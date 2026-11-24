@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clean Code y Software Craftsmanship — Tutorial interactivo</title>
+<style>
+:root{
+  --bg:#0a0e1a; --card:#0f172a; --line:#1e3a5f; --txt:#e2e8f0; --muted:#94a3b8;
+  --acc:#38bdf8; --code:#050a13; --ok:#34d399; --bad:#f87171; --warn:#fbbf24;
+  --drawer:#0f172a;
+}
+html.light{
+  --bg:#f1f5f9; --card:#ffffff; --line:#cbd5e1; --txt:#0f172a; --muted:#475569;
+  --acc:#0284c7; --code:#f8fafc; --ok:#047857; --bad:#b91c1c; --warn:#b45309;
+}
+*{box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  line-height:1.65;padding-top:58px;padding-bottom:74px;
+  -webkit-text-size-adjust:100%;
+}
+img,svg{max-width:100%}
+a{color:var(--acc)}
+
+/* ---------- BARRA SUPERIOR ---------- */
+#nav{
+  position:fixed;top:0;left:0;right:0;height:58px;z-index:30;
+  display:flex;align-items:center;gap:8px;padding:0 10px;
+  background:rgba(10,14,26,.97);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+html.light #nav{background:rgba(248,250,252,.97)}
+#chips{display:flex;gap:8px;overflow-x:auto;flex:1;min-width:0;padding:8px 0;scrollbar-width:none}
+#chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  min-height:42px;height:42px;padding:0 14px;border-radius:999px;
+  border:1px solid var(--line);background:transparent;color:var(--muted);
+  font:inherit;font-size:.8rem;font-weight:600;letter-spacing:.02em;
+  cursor:pointer;white-space:nowrap;transition:background .18s,color .18s,border-color .18s;
+}
+.chip:hover{color:var(--txt);border-color:#2c5282}
+.chip.on{background:#38bdf822;color:var(--acc);border-color:var(--acc)}
+.chip:focus-visible,.tbtn:focus-visible,.btn:focus-visible,.copy:focus-visible,
+#dr a:focus-visible,input:focus-visible,summary:focus-visible{
+  outline:2px solid var(--acc);outline-offset:2px;
+}
+
+/* ---------- PROGRESO ---------- */
+#pbar{position:fixed;top:57px;left:0;right:0;height:3px;background:transparent;z-index:35}
+#pfill{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#a78bfa);transition:width .12s linear}
+
+/* ---------- PANEL ÍNDICE ---------- */
+#dr{
+  position:fixed;top:58px;left:0;bottom:0;width:min(330px,88vw);
+  background:var(--drawer);border-right:1px solid #1e3a5f;
+  transform:translateX(-105%);transition:transform .25s ease;
+  z-index:25;overflow:auto;padding:10px;
+  -webkit-overflow-scrolling:touch;
+}
+#dr.o{transform:none}
+#dr a{
+  display:flex;align-items:center;padding:12px;border-radius:8px;
+  color:#e2e8f0;cursor:pointer;min-height:44px;text-decoration:none;
+  font-size:.92rem;line-height:1.35;
+}
+#dr a:hover{background:#ffffff0d}
+#dr a.on{background:#00d4ff22;color:#00d4ff;font-weight:600}
+
+/* ---------- BARRA DE HERRAMIENTAS ---------- */
+#tools{
+  position:fixed;left:0;right:0;bottom:0;z-index:24;
+  display:flex;align-items:center;gap:6px;padding:8px 10px;
+  background:rgba(10,14,26,.97);border-top:1px solid var(--line);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+html.light #tools{background:rgba(248,250,252,.97)}
+.searchwrap{position:relative;flex:1;min-width:0}
+#q{
+  width:100%;height:38px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--txt);padding:0 14px;font:inherit;font-size:.85rem;
+}
+#q::placeholder{color:var(--muted)}
+#qres{
+  display:none;position:absolute;bottom:46px;left:0;right:0;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:6px;max-height:46vh;overflow:auto;box-shadow:0 12px 30px #0008;
+}
+#qres.on{display:block}
+.qitem{
+  display:flex;justify-content:space-between;gap:10px;width:100%;
+  background:transparent;border:0;color:var(--txt);font:inherit;font-size:.85rem;
+  text-align:left;padding:10px;border-radius:8px;cursor:pointer;min-height:44px;align-items:center;
+}
+.qitem:hover{background:#38bdf81a}
+.qn{color:var(--acc);font-weight:700;font-size:.75rem;flex:0 0 auto}
+.qempty{padding:12px;color:var(--muted);font-size:.85rem;text-align:center}
+.tbtn{
+  flex:0 0 auto;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card);color:var(--txt);font:inherit;font-size:.85rem;font-weight:700;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+}
+.tbtn:hover{border-color:var(--acc);color:var(--acc)}
+
+/* ---------- CONTENIDO ---------- */
+main{max-width:1000px;margin:0 auto;padding:22px 16px 30px}
+.sec{display:none;animation:fade .25s ease}
+.sec.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(1.6rem,5vw,2.3rem);line-height:1.2;margin:.6rem 0 .5rem;letter-spacing:-.02em}
+h2{font-size:clamp(1.3rem,3.6vw,1.7rem);margin:2rem 0 .8rem;line-height:1.25;letter-spacing:-.01em}
+h2:first-child{margin-top:.2rem}
+h3{font-size:1.06rem;margin:1.4rem 0 .5rem;color:var(--acc)}
+h4{font-size:.98rem;margin:1rem 0 .4rem}
+p{margin:.6rem 0}
+ul,ol{margin:.5rem 0 .8rem;padding-left:1.25rem}
+li{margin:.3rem 0}
+.lead{font-size:1.02rem;color:var(--muted)}
+.small{font-size:.85rem;color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:1.6rem 0}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin:12px 0}
+.card>h3:first-child,.card>h4:first-child{margin-top:0}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:720px){.grid2{grid-template-columns:1fr 1fr}}
+.grid3{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+@media(min-width:640px){.grid3{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.grid3{grid-template-columns:1fr 1fr 1fr}}
+
+.pill{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.04em;
+  padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.ok{color:var(--ok);border-color:var(--ok)}
+.pill.bad{color:var(--bad);border-color:var(--bad)}
+.pill.warn{color:var(--warn);border-color:var(--warn)}
+
+pre{
+  background:var(--code);border:1px solid var(--line);border-radius:10px;
+  padding:14px;overflow:auto;margin:.6rem 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  font-size:.82rem;line-height:1.55;color:var(--txt);
+  -webkit-overflow-scrolling:touch;
+}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:.88em}
+p code,li code,td code{background:#1e3a5f55;padding:1px 6px;border-radius:5px}
+.codewrap{position:relative;margin:.6rem 0}
+.codewrap pre{margin:0;padding-top:40px}
+.copy{
+  position:absolute;top:7px;right:7px;z-index:2;
+  font:inherit;font-size:.68rem;font-weight:700;letter-spacing:.06em;
+  padding:6px 10px;border-radius:8px;border:1px solid var(--line);
+  background:#0f172a;color:#94a3b8;cursor:pointer;min-height:28px;
+}
+.copy:hover{color:var(--acc);border-color:var(--acc)}
+.copy.ok{color:#34d399;border-color:#34d399}
+
+.bad{border-left:3px solid var(--bad);padding-left:12px}
+.good{border-left:3px solid var(--ok);padding-left:12px}
+
+.tblwrap{overflow-x:auto;margin:.8rem 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;min-width:440px;font-size:.88rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#1e3a5f44;font-weight:700;color:var(--txt)}
+html.light th{background:#e2e8f0}
+
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.btn{
+  font:inherit;font-size:.88rem;font-weight:600;padding:11px 18px;border-radius:10px;
+  border:1px solid var(--line);background:var(--card);color:var(--txt);cursor:pointer;
+  min-height:44px;display:inline-flex;align-items:center;gap:8px;transition:.18s;
+}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.primary{background:#38bdf81a;border-color:var(--acc);color:var(--acc)}
+.btn.primary:hover{background:#38bdf833}
+
+details.acc{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:0;margin:10px 0;overflow:hidden;
+}
+details.acc>summary{
+  cursor:pointer;padding:14px 16px;font-weight:600;font-size:.95rem;
+  list-style:none;display:flex;gap:10px;align-items:flex-start;min-height:44px;
+}
+details.acc>summary::-webkit-details-marker{display:none}
+details.acc>summary::before{content:"▸";color:var(--acc);flex:0 0 auto;transition:transform .2s}
+details.acc[open]>summary::before{transform:rotate(90deg)}
+details.acc>.accbody{padding:0 16px 16px}
+details.acc>.accbody>*:first-child{margin-top:0}
+
+.qa{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+.qa h3{margin:0 0 6px;font-size:.98rem;color:var(--txt);display:flex;gap:10px;align-items:baseline}
+.qnum{
+  flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  min-width:26px;height:26px;border-radius:8px;background:#38bdf81a;color:var(--acc);
+  font-size:.75rem;font-weight:800;
+}
+.qa p{margin:.35rem 0;font-size:.92rem}
+.lvl{
+  margin:26px 0 10px;font-size:.78rem;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--acc);border-bottom:1px solid var(--line);padding-bottom:6px;
+}
+
+.chk{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:8px;
+  border:1px solid var(--line);margin:8px 0;cursor:pointer;min-height:44px;font-size:.9rem}
+.chk:hover{background:#38bdf80d}
+.chk input{margin-top:4px;width:18px;height:18px;flex:0 0 auto;accent-color:#38bdf8}
+
+/* ---------- HERO ---------- */
+.hero-wrap{display:flex;justify-content:center;margin:6px 0 14px}
+.hero{
+  position:relative;width:100%;max-width:430px;aspect-ratio:8/9;
+  border-radius:18px;overflow:hidden;border:1px solid var(--line);
+  background:#05080f;box-shadow:0 18px 50px -22px #38bdf866;
+}
+.hero svg{display:block;width:100%;height:100%}
+
+/* ---------- ANIMACIONES SVG ---------- */
+.hbar{opacity:0;animation:hbarIn 7s ease-in-out infinite}
+@keyframes hbarIn{
+  0%{opacity:0;transform:translateX(-22px)}
+  14%{opacity:.85;transform:translateX(0)}
+  72%{opacity:.85;transform:translateX(0)}
+  100%{opacity:0;transform:translateX(0)}
+}
+.hpart{animation:hfloat 8s ease-in-out infinite}
+@keyframes hfloat{
+  0%,100%{transform:translateY(0);opacity:.12}
+  50%{transform:translateY(-46px);opacity:.9}
+}
+
+/* ---------- TEMA CLARO ---------- */
+html.light .hero{background:#e2e8f0}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:400px){
+  .tbtn{width:34px;height:34px;font-size:.78rem}
+  #tools{gap:4px;padding:7px 8px}
+  .btn{padding:10px 14px;font-size:.84rem}
+}
+
+/* ---------- IMPRESIÓN ---------- */
+@media print{
+  @page{size:A4 portrait;margin:14mm 12mm}
+  html,body{background:#fff!important;color:#000!important;padding:0!important;margin:0!important}
+  #nav,#tools,#dr,#pbar,.copy,.btnrow,.tbtn,#qres{display:none!important}
+  section.sec{display:block!important;page-break-after:auto;animation:none!important}
+  main{max-width:none;padding:0;margin:0}
+  .card,.qa,details.acc,pre,table,.hero{break-inside:avoid}
+  .hero{max-width:300px;margin:0 auto 10px;border:1px solid #999;box-shadow:none;background:#fff}
+  pre{background:#f4f4f4!important;color:#000!important;border:1px solid #999!important;white-space:pre-wrap;word-break:break-word}
+  p code,li code,td code{background:#eee!important;color:#000!important}
+  th{background:#eee!important;color:#000!important}
+  th,td{border:1px solid #666!important}
+  h1,h2,h3,h4{color:#000!important}
+  .lead,.small{color:#333!important}
+  a{color:#000!important;text-decoration:underline}
+  .pill{border-color:#666!important;color:#000!important}
+  details.acc{border:1px solid #999!important;background:#fff!important}
+  details.acc>.accbody{padding:0 12px 12px}
+  .qa{background:#fff!important}
+  .qnum{background:#eee!important;color:#000!important}
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  .hbar{opacity:.7}
+  .hpart{opacity:.6}
+}
+</style>
+</head>
+<body>
+
+<div id="pbar" aria-hidden="true"><div id="pfill"></div></div>
+
+<nav id="nav" aria-label="Barra de navegación principal">
+  <button class="chip" id="mb" aria-label="Abrir índice" aria-controls="dr" aria-expanded="false">☰ Índice</button>
+  <div id="chips">
+    <button class="chip on" data-i="0">INICIO</button>
+    <button class="chip" data-i="1">CONCEPTOS</button>
+    <button class="chip" data-i="2">PROCEDIMIENTO</button>
+    <button class="chip" data-i="3">PRÁCTICA</button>
+    <button class="chip" data-i="4">33 Preguntas (Q&amp;A)</button>
+    <button class="chip" data-i="5">ERRORES</button>
+    <button class="chip" data-i="6">RESUMEN</button>
+    <button class="chip" data-i="7">FUENTES</button>
+    <button class="chip" data-i="8">CRÉDITOS</button>
+  </div>
+</nav>
+
+<div id="dr" role="navigation" aria-label="Índice de secciones"></div>
+
+<main>
+
+<!-- ============================ INICIO ============================ -->
+<section class="sec on" id="s0" data-t="Inicio">
+  <div class="hero-wrap">
+    <div class="hero" id="heroHome" role="img" aria-label="Ilustración animada: un cristal hexagonal luminoso representa el código limpio, rodeado de anillos giratorios, nodos de datos y fragmentos de código que se alinean en orden."></div>
+  </div>
+
+  <h1>Clean Code y Software Craftsmanship</h1>
+  <p class="lead">Aprende a escribir código que otras personas —y tu yo del futuro— puedan leer, entender y mantener sin sufrir. Un recorrido práctico y progresivo por los principios de <em>Código Limpio</em> de Robert C. Martin, explicados desde cero.</p>
+
+  <div class="btnrow">
+    <button class="btn primary" id="ix">☰ Ver índice</button>
+    <button class="btn" data-go="1">Empezar por los conceptos →</button>
+    <button class="btn" data-go="4">Ir a las 33 preguntas →</button>
+  </div>
+
+  <div class="grid3">
+    <div class="card">
+      <span class="pill">Qué es</span>
+      <h3>Código limpio</h3>
+      <p>Es código que cualquier desarrollador puede leer, entender y modificar sin necesidad de explicaciones externas. Se lee como literatura técnica: revela su intención, no esconde efectos secundarios y está respaldado por pruebas.</p>
+    </div>
+    <div class="card">
+      <span class="pill">Para qué sirve</span>
+      <h3>Reducir el coste del cambio</h3>
+      <p>La mayor parte del coste de un sistema no está en escribirlo, sino en leerlo y modificarlo durante años. El código limpio hace que cada cambio sea más rápido, más seguro y más barato.</p>
+    </div>
+    <div class="card">
+      <span class="pill">Por qué importa</span>
+      <h3>Velocidad sostenible</h3>
+      <p>Un equipo que ensucia el código se vuelve más lento con el tiempo. Un equipo que lo mantiene limpio conserva la capacidad de entregar rápido incluso años después.</p>
+    </div>
+    <div class="card">
+      <span class="pill">A quién va dirigido</span>
+      <h3>Sin conocimientos previos</h3>
+      <p>A personas que empiezan a programar, a quienes ya programan y quieren mejorar, y a cualquier perfil técnico que necesite revisar código ajeno con criterio.</p>
+    </div>
+    <div class="card">
+      <span class="pill">Qué necesitas</span>
+      <h3>Requisitos previos</h3>
+      <p>Saber qué es una variable, una función y una clase a nivel muy básico. No hace falta experiencia profesional ni un lenguaje concreto: los ejemplos usan una sintaxis sencilla tipo JavaScript.</p>
+    </div>
+    <div class="card">
+      <span class="pill">Cómo usarlo</span>
+      <h3>Recorrido recomendado</h3>
+      <p>Lee <strong>Conceptos</strong>, sigue el <strong>Procedimiento</strong>, resuelve la <strong>Práctica</strong>, consolida con las <strong>33 preguntas</strong> y revisa los <strong>Errores comunes</strong>. Al final, usa el <strong>Resumen</strong> como checklist.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Qué vas a aprender</h2>
+  <ul>
+    <li>Nombrar variables, funciones y clases de forma que revelen su intención.</li>
+    <li>Escribir funciones pequeñas que hagan una sola cosa y tengan pocos argumentos.</li>
+    <li>Gestionar errores con excepciones y eliminar el <code>null</code> de tu diseño.</li>
+    <li>Decidir qué comentarios aportan valor y cuáles deben desaparecer.</li>
+    <li>Aplicar la Ley de Demeter y distinguir objetos de estructuras de datos.</li>
+    <li>Escribir pruebas limpias con TDD, el patrón Given-When-Then y las reglas F.I.R.S.T.</li>
+    <li>Organizar clases con SRP, cohesión y los principios SOLID.</li>
+    <li>Aislar el código concurrente para que no contamine la lógica de negocio.</li>
+  </ul>
+
+  <div class="card">
+    <h3>Cómo está organizado este tutorial</h3>
+    <p>El tutorial es un archivo HTML autónomo: no necesita internet ni instalar nada. Puedes moverte con los <strong>chips</strong> de la barra superior, con el <strong>índice lateral</strong> (botón ☰ Índice) o con las <strong>flechas ← →</strong> del teclado. Tu progreso y tus preferencias se guardan en tu navegador.</p>
+    <p class="small">Versión V001 · Creado el 27/10/2026 a las 09:10:05.</p>
+  </div>
+</section>
+
+<!-- ============================ CONCEPTOS ============================ -->
+<section class="sec" id="s1" data-t="Conceptos fundamentales">
+  <h2>Conceptos fundamentales</h2>
+  <p class="lead">Antes de tocar una sola línea de código conviene entender <em>por qué</em> existen estas reglas. Todo el manual se apoya en cuatro ideas.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>1. El código es literatura técnica</h3>
+      <p>El código se lee muchas más veces de las que se escribe. Cada vez que alguien abre un archivo para entenderlo, modificarlo o depurarlo, está leyendo. Por eso hay que programar pensando en la persona que leerá ese código dentro de seis meses.</p>
+    </div>
+    <div class="card">
+      <h3>2. La Regla del Boy Scout</h3>
+      <p><em>«Deja el código más limpio de lo que lo encontraste»</em>. Toda modificación, por pequeña que sea, debe dejar el módulo en un estado superior de limpieza y orden.</p>
+    </div>
+    <div class="card">
+      <h3>3. Mantenimiento y disciplina</h3>
+      <p>La calidad no es un acto aislado, sino una disciplina continua de atención al detalle, refactorización sin compasión y honestidad con el estado real de la base de código.</p>
+    </div>
+    <div class="card">
+      <h3>4. Honestidad en el código</h3>
+      <p>Si no puedes resolver un problema sin violar abstracciones o introducir parches oscuros, expresa la limitación con claridad y propón la refactorización adecuada. Un parche silencioso es deuda técnica con intereses.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Módulo 1 · Nombres con sentido</h2>
+
+  <h3>1.1 Revelar la intención</h3>
+  <p>El nombre de una variable, función o clase debe responder a tres preguntas: <strong>¿por qué existe?</strong>, <strong>¿qué hace?</strong> y <strong>¿cómo se usa?</strong>. Si un identificador necesita un comentario para explicarse, el nombre ha fallado.</p>
+  <div class="codewrap">
+    <button class="copy" type="button">COPIAR</button>
+    <pre><code>// ❌ Incorrecto
+int d; // tiempo transcurrido en días
+
+// ✅ Correcto
+int elapsedTimeInDays;
+int daysSinceModification;
+int fileAgeInDays;</code></pre>
+  </div>
+
+  <h3>1.2 Evitar la desinformación y las pistas falsas</h3>
+  <ul>
+    <li>No incluyas el tipo en el nombre salvo que realmente corresponda a esa estructura: si no es una <code>List</code>, no lo llames <code>accountList</code>; usa <code>accounts</code> o <code>accountGroup</code>.</li>
+    <li>Evita variaciones sutiles e imperceptibles: <code>XYZControllerForEfficientHandlingOfStrings</code> frente a <code>XYZControllerForEfficientStorageOfStrings</code> es una trampa para el lector.</li>
+    <li>Evita letras ambiguas aisladas como <code>l</code> (ele minúscula) y <code>O</code> (o mayúscula), que se confunden con <code>1</code> y <code>0</code>.</li>
+  </ul>
+
+  <h3>1.3 Distinciones con sentido, sin palabras de relleno</h3>
+  <p>Elimina palabras vacías o redundantes como <code>Data</code>, <code>Info</code>, <code>Object</code>, <code>Value</code>, o prefijos genéricos: <code>CustomerData</code> es simplemente <code>Customer</code>; <code>NameString</code> es <code>Name</code>.</p>
+
+  <h3>1.4 Nombres buscables y proporcionales al ámbito</h3>
+  <p>La longitud del nombre debe corresponder al tamaño de su ámbito. En un método de tres líneas, <code>i</code> y <code>j</code> son aceptables. Una constante usada en todo el sistema debe poder encontrarse con una búsqueda de texto: <code>WORK_DAYS_PER_WEEK</code> en lugar del número mágico <code>5</code>.</p>
+
+  <h3>1.5 Evitar codificaciones y prefijos heredados</h3>
+  <p>Nada de Notación Húngara ni prefijos de miembro como <code>m_</code> o <code>f</code>. Para interfaces, prefiere el nombre limpio (<code>ShapeFactory</code>) y marca la implementación concreta si hace falta (<code>ShapeFactoryImpl</code> o <code>CShapeFactory</code>), evitando el prefijo <code>I</code>.</p>
+
+  <h3>1.6 Nombres de clases y métodos</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Elemento</th><th>Regla</th><th>Ejemplos</th></tr></thead>
+      <tbody>
+        <tr><td>Clases y objetos</td><td>Sustantivos o frases sustantivas. Prohibidos verbos y términos imprecisos como <code>Manager</code>, <code>Processor</code>, <code>Data</code>, <code>Info</code>.</td><td><code>Customer</code>, <code>WikiPage</code>, <code>Account</code>, <code>AddressParser</code></td></tr>
+        <tr><td>Métodos</td><td>Verbos o frases verbales.</td><td><code>postPayment</code>, <code>deletePage</code>, <code>save</code></td></tr>
+        <tr><td>Accesores y predicados</td><td>Estándar JavaBean.</td><td><code>getName()</code>, <code>setName()</code>, <code>isPosted()</code></td></tr>
+        <tr><td>Constructores sobrecargados</td><td>Métodos de factoría estáticos con nombres descriptivos.</td><td><code>Complex.fromRealNumber(23.0)</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>1.7 Una palabra por concepto</h3>
+  <p>Mantén un léxico coherente en todo el proyecto: no mezcles <code>fetch</code>, <code>retrieve</code> y <code>get</code> para la misma operación en clases distintas. Usa términos del dominio de la solución (patrones como <code>AccountVisitor</code> o <code>JobQueue</code>) cuando hables con desarrolladores, y términos del dominio del problema cuando corresponda a reglas de negocio.</p>
+
+  <hr>
+
+  <h2>Módulo 2 · Funciones reducidas y enfocadas</h2>
+
+  <h3>2.1 Tamaño mínimo y nivel de anidamiento</h3>
+  <p>La primera regla de las funciones es que deben ser reducidas (idealmente menos de 20 líneas). La segunda es que deben ser aún más reducidas. El sangrado no debería superar <strong>uno o dos niveles</strong>: los bloques dentro de <code>if</code>, <code>else</code> o <code>while</code> deberían ser una sola línea con una llamada a una función con nombre descriptivo.</p>
+
+  <h3>2.2 Hacer una sola cosa</h3>
+  <p><em>«Las funciones solo deben hacer una cosa. Deben hacerlo bien y debe ser lo único que hagan»</em>. Una función hace una sola cosa si todas sus instrucciones están exactamente <strong>un nivel de abstracción por debajo</strong> del nombre de la función. Si puedes extraer una función secundaria cuyo nombre no sea una simple reconfiguración de la implementación, la función original hacía más de una cosa.</p>
+
+  <h3>2.3 Un nivel de abstracción por función</h3>
+  <p>El código debe leerse de arriba abajo como un conjunto de párrafos <em>PARA</em>, descendiendo un nivel de abstracción a la vez. Esto se conoce como <strong>Regla Descendente</strong> (<em>Stepdown Rule</em>).</p>
+
+  <h3>2.4 Sentencias switch ocultas</h3>
+  <p>Evita las sentencias <code>switch</code> o las cadenas <code>if/else</code> repetitivas basadas en tipos. Escóndelas dentro de una <strong>Factoría Abstracta</strong> que instancie objetos polimórficos: así se cumplen SRP y OCP. La <code>switch</code> aparece una sola vez, en la factoría, y el resto del sistema trabaja con la abstracción.</p>
+
+  <h3>2.5 Firmas y argumentos</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Nº de argumentos</th><th>Nombre</th><th>Veredicto</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>Niládica</td><td>Óptimo</td></tr>
+        <tr><td>1</td><td>Monádica</td><td>Consulta sobre el argumento (<code>fileExists("f")</code>) o transformación (<code>fileOpen("f")</code>)</td></tr>
+        <tr><td>2</td><td>Diádica</td><td>Aceptable solo con cohesión natural u orden cartesiano (<code>Point(x, y)</code>)</td></tr>
+        <tr><td>3</td><td>Triádica</td><td>Exige justificación especial</td></tr>
+        <tr><td>4 o más</td><td>Poliádica</td><td>Prohibida salvo excepciones extremas</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Si una función necesita dos o más parámetros relacionados, agrúpalos en una clase o concepto propio: <code>Point center</code> en lugar de <code>double x, double y</code>.</p>
+
+  <h3>2.6 Prohibición de argumentos bandera</h3>
+  <p>Pasar un booleano a una función (<code>render(boolean isSuite)</code>) indica que la función hace dos cosas distintas. Divídela en dos funciones independientes: <code>renderForSuite()</code> y <code>renderForSingleTest()</code>.</p>
+
+  <h3>2.7 Sin efectos secundarios ni argumentos de salida</h3>
+  <p>Una función no debe modificar el estado global ni variables de clase que no anuncie su nombre. Evita los argumentos de salida: si una función debe cambiar el estado de algo, que cambie el estado de su objeto contenedor (<code>report.appendFooter()</code> en lugar de <code>appendFooter(report)</code>).</p>
+
+  <h3>2.8 Separación de consultas y comandos (CQS)</h3>
+  <p>Una función debe <strong>hacer algo</strong> (cambiar el estado) o <strong>responder a algo</strong> (devolver información), pero nunca ambas cosas.</p>
+  <div class="codewrap">
+    <button class="copy" type="button">COPIAR</button>
+    <pre><code>// ❌ Incorrecto: ¿"set" es verbo o adjetivo?
+if (set("username", "unclebob")) { ... }
+
+// ✅ Correcto
+if (attributeExists("username")) {
+    setAttribute("username", "unclebob");
+}</code></pre>
+  </div>
+
+  <hr>
+
+  <h2>Módulo 3 · Procesamiento de errores y robustez</h2>
+
+  <h3>3.1 Usar excepciones en lugar de códigos de error</h3>
+  <p>Devolver códigos de error (<code>E_OK</code>, <code>E_ERROR</code>) obliga al invocador a evaluar condicionales anidadas de inmediato, mezclando la lógica de negocio con la gestión de fallos. Lanza excepciones para separar completamente el algoritmo principal de la recuperación de errores.</p>
+
+  <h3>3.2 Extraer los bloques try/catch</h3>
+  <p>La gestión de errores es una responsabilidad única. Si una función contiene la palabra clave <code>try</code>, esta debe ser la <strong>primera instrucción</strong> de la función y no debe haber nada después de los bloques <code>catch</code>/<code>finally</code>. Extrae el cuerpo de <code>try</code> y de <code>catch</code> a funciones privadas independientes.</p>
+
+  <h3>3.3 Usar excepciones no comprobadas</h3>
+  <p>Las excepciones comprobadas (<em>checked exceptions</em>) rompen el Principio Abierto/Cerrado y la encapsulación: una excepción lanzada en un nivel inferior obliga a modificar la firma <code>throws</code> de todos los métodos intermedios de la cadena de llamadas.</p>
+
+  <h3>3.4 Eliminar el manejo y la devolución de null</h3>
+  <p><strong>No devuelvas <code>null</code></strong>: genera una proliferación de verificaciones defensivas y causa <code>NullPointerException</code>. En su lugar:</p>
+  <ul>
+    <li>Devuelve colecciones vacías (<code>Collections.emptyList()</code>).</li>
+    <li>Aplica el <strong>Patrón de Caso Especial</strong> (<em>Null Object</em>).</li>
+    <li>Lanza una excepción representativa.</li>
+  </ul>
+  <p><strong>No pases <code>null</code></strong> como argumento, salvo que uses una API externa que lo requiera expresamente.</p>
+
+  <hr>
+
+  <h2>Módulo 4 · Comentarios</h2>
+
+  <h3>4.1 El antipatrón del comentario</h3>
+  <p><em>«No comente el código incorrecto, reescríbalo»</em> (Kernighan &amp; Plaugher). Los comentarios no son intrínsecamente buenos: son, en el mejor de los casos, un mal necesario para compensar la incapacidad de expresarnos en el código. Los comentarios mienten y envejecen peor que el código, porque rara vez se mantienen al refactorizar.</p>
+
+  <h3>4.2 Comentarios inaceptables</h3>
+  <ul>
+    <li><strong>Código comentado:</strong> aborrecible. Debe eliminarse sin dudar; el sistema de control de versiones conserva el historial.</li>
+    <li><strong>Comentarios redundantes u obvios:</strong> <code>i++; // incrementar i</code>.</li>
+    <li><strong>Comentarios de llave de cierre:</strong> <code>} // end for</code>. Si sientes la necesidad de marcar cierres, la función es demasiado larga.</li>
+    <li><strong>Historiales de cambios y autoría:</strong> deben gestionarse con Git, no con comentarios.</li>
+  </ul>
+
+  <h3>4.3 Comentarios válidos</h3>
+  <ul>
+    <li>Comentarios legales o de <em>copyright</em> corporativo obligatorio.</li>
+    <li>Advertencias de consecuencias importantes (por qué un test está desactivado con <code>@Ignore("Tarda más de 10 min")</code>).</li>
+    <li>Comentarios <code>// TODO</code> para registrar deudas técnicas temporales, revisadas y eliminadas periódicamente.</li>
+    <li>Explicación de la intención tras una decisión de diseño no evidente.</li>
+  </ul>
+
+  <hr>
+
+  <h2>Módulo 5 · Formato y estructura</h2>
+  <p><strong>La metáfora del periódico:</strong> un archivo fuente debe leerse como un artículo de prensa. La cabecera indica el concepto, las primeras secciones dan los detalles de alto nivel y los detalles de implementación aparecen al final.</p>
+  <ul>
+    <li><strong>Apertura y densidad vertical:</strong> separa conceptos independientes con líneas en blanco (paquetes, importaciones, métodos) y mantén juntas las líneas estrechamente relacionadas.</li>
+    <li><strong>Variables locales:</strong> decláralas lo más cerca posible de su primer uso.</li>
+    <li><strong>Variables de instancia:</strong> en la parte superior de la clase.</li>
+    <li><strong>Funciones dependientes:</strong> si <code>A</code> invoca a <code>B</code>, <code>A</code> debe situarse verticalmente por encima de <code>B</code>.</li>
+  </ul>
+
+  <hr>
+
+  <h2>Módulo 6 · Objetos y estructuras de datos</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Objetos</h3>
+      <p>Ocultan sus datos tras abstracciones y exponen funciones operativas. Facilitan añadir nuevas clases o tipos sin modificar las funciones existentes.</p>
+    </div>
+    <div class="card">
+      <h3>Estructuras de datos</h3>
+      <p>Exponen sus datos y carecen de funciones con comportamiento significativo (DTOs, Beans). Facilitan añadir nuevas funciones sin modificar las estructuras existentes.</p>
+    </div>
+  </div>
+  <p><strong>Prohibición de clases híbridas:</strong> evita estructuras mixtas que intentan ser objetos con lógica de negocio y a la vez exponen sus campos públicos o mediante <em>getters</em>/<em>setters</em> indiscriminados.</p>
+
+  <h3>La Ley de Demeter</h3>
+  <p>Un módulo no debe conocer los entresijos de los objetos que manipula: <em>«Habla solo con tus amigos inmediatos, no con desconocidos»</em>.</p>
+  <div class="codewrap">
+    <button class="copy" type="button">COPIAR</button>
+    <pre><code>// ❌ Violación: choque de trenes
+ctxt.getOptions().getScratchDir().getAbsolutePath();
+
+// ✅ Solución: delega la acción en el contenedor
+ctxt.createScratchFileStream(classFileName);</code></pre>
+  </div>
+
+  <hr>
+
+  <h2>Módulo 7 · Pruebas de unidad limpias y TDD</h2>
+
+  <h3>7.1 Las tres leyes del TDD</h3>
+  <ol>
+    <li>No crearás código de producción hasta haber redactado una prueba de unidad que falle.</li>
+    <li>No crearás más de una prueba de unidad que baste como fallida (y no compilar se considera un fallo).</li>
+    <li>No crearás más código de producción que el necesario para superar la prueba de fallo actual.</li>
+  </ol>
+
+  <h3>7.2 El estándar dual</h3>
+  <p>El código de prueba es tan importante como el de producción. Debe mantenerse limpio, legible y refactorizado constantemente. Sin pruebas limpias se pierde la flexibilidad del código de producción y el miedo al cambio paraliza la refactorización.</p>
+
+  <h3>7.3 Generar-Operar-Comprobar (Given-When-Then / AAA)</h3>
+  <ol>
+    <li><strong>Generar (Given / Arrange):</strong> construcción de los datos de prueba.</li>
+    <li><strong>Operar (When / Act):</strong> ejecución de la operación a probar.</li>
+    <li><strong>Comprobar (Then / Assert):</strong> verificación de los resultados esperados.</li>
+  </ol>
+
+  <h3>7.4 Las cinco reglas F.I.R.S.T.</h3>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Letra</th><th>Regla</th><th>Significado</th></tr></thead>
+      <tbody>
+        <tr><td>F</td><td>Fast (Rapidez)</td><td>Deben ejecutarse muy rápidamente para correrse con frecuencia.</td></tr>
+        <tr><td>I</td><td>Independent (Independencia)</td><td>Ninguna prueba debe depender del estado dejado por otra.</td></tr>
+        <tr><td>R</td><td>Repeatable (Repetibilidad)</td><td>Deben poder ejecutarse en cualquier entorno, sin red.</td></tr>
+        <tr><td>S</td><td>Self-Validating (Validación automática)</td><td>Devuelven un resultado booleano: pasa o falla.</td></tr>
+        <tr><td>T</td><td>Timely (Puntualidad)</td><td>Se redactan justo antes del código de producción.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>Un solo concepto por prueba:</strong> minimiza las afirmaciones por prueba y evalúa un único concepto lógico por función de prueba.</p>
+
+  <hr>
+
+  <h2>Módulo 8 · Clases, arquitectura y diseño emergente</h2>
+
+  <h3>8.1 Organización y tamaño de clases</h3>
+  <ul>
+    <li><strong>Tamaño medido en responsabilidades:</strong> una clase debe tener una sola razón para cambiar (SRP).</li>
+    <li><strong>Nombre conciso:</strong> si no puedes nombrar una clase de forma precisa en 25 palabras sin usar «y», «o», «si» o «pero», la clase tiene demasiado volumen.</li>
+    <li><strong>Cohesión:</strong> alta cohesión significa que la mayoría de los métodos manipulan la mayoría de las variables de instancia. Cuando la cohesión baja, divide la clase.</li>
+  </ul>
+
+  <h3>8.2 Principios SOLID en código limpio</h3>
+  <ul>
+    <li><strong>SRP</strong> (Single Responsibility Principle): una sola razón para cambiar por clase o módulo.</li>
+    <li><strong>OCP</strong> (Open/Closed Principle): abierto a la extensión, cerrado a la modificación, mediante subclases o interfaces.</li>
+    <li><strong>DIP</strong> (Dependency Inversion Principle): depender de abstracciones (interfaces), no de detalles concretos.</li>
+  </ul>
+
+  <h3>8.3 Las cuatro reglas del diseño sencillo de Kent Beck</h3>
+  <p>Un diseño es limpio y suficiente si cumple estas cuatro reglas, <strong>en orden estricto de prioridad</strong>:</p>
+  <ol>
+    <li><strong>Ejecuta todas las pruebas:</strong> el sistema funciona y es completamente testable.</li>
+    <li><strong>No contiene duplicados (DRY):</strong> elimina duplicación de código, lógica e intención.</li>
+    <li><strong>Expresa la intención del programador:</strong> nombres descriptivos y abstracciones claras.</li>
+    <li><strong>Minimiza el número de clases y métodos:</strong> evita el dogmatismo y el exceso de abstracciones innecesarias.</li>
+  </ol>
+
+  <hr>
+
+  <h2>Módulo 9 · Concurrencia limpia</h2>
+  <ul>
+    <li><strong>Aislar el código concurrente:</strong> la concurrencia es lo suficientemente compleja como para constituir un motivo de cambio único. Separa el código multihilo del código de lógica de negocio en POJOs independientes.</li>
+    <li><strong>Limitar el acceso a datos compartidos:</strong> encapsula los datos compartidos y restringe al máximo las secciones críticas.</li>
+    <li><strong>Usar copias de datos:</strong> prefiere procesar objetos como copias de solo lectura para evitar la sincronización.</li>
+    <li><strong>Hilos independientes:</strong> diseña subprocesos que operen en subconjuntos de datos independientes sin compartir estado entre sí.</li>
+  </ul>
+</section>
+
+<!-- ============================ PROCEDIMIENTO ============================ -->
+<section class="sec" id="s2" data-t="Procedimiento paso a paso">
+  <h2>Procedimiento paso a paso</h2>
+  <p class="lead">Este es el orden de trabajo que puedes aplicar hoy mismo sobre cualquier archivo que tengas delante. Cada paso indica su objetivo, las acciones concretas, el resultado esperado y qué hacer si algo falla.</p>
+
+  <details class="acc" open>
+    <summary>Paso 1 · Comprender antes de tocar</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> saber exactamente qué hace el código y por qué existe antes de cambiar una coma.</p>
+      <ol>
+        <li>Lee el archivo completo de arriba abajo, sin editar nada.</li>
+        <li>Ejecútalo o localiza sus pruebas para ver el comportamiento real.</li>
+        <li>Escribe en una frase qué hace el módulo y para quién.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> puedes explicar el módulo en una sola frase sin leer el código.</p>
+      <p class="small"><strong>Si algo falla:</strong> si no lo entiendes, no refactorices todavía. Escribe primero una prueba que documente el comportamiento actual y te sirva de red de seguridad.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 2 · Renombrar con intención</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> que cada nombre se explique solo.</p>
+      <ol>
+        <li>Busca variables de una o dos letras fuera de bucles cortos.</li>
+        <li>Sustituye cada nombre por otro que responda a <em>qué es</em> y <em>para qué sirve</em>.</li>
+        <li>Elimina palabras de relleno: <code>Data</code>, <code>Info</code>, <code>Object</code>, <code>Value</code>.</li>
+        <li>Convierte los números mágicos en constantes con nombre.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> puedes leer el código en voz alta y suena a frases con sentido.</p>
+      <p class="small"><strong>Si algo falla:</strong> si un nombre necesita un comentario para entenderse, el nombre sigue siendo el problema, no el comentario.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 3 · Extraer funciones hasta que hagan una sola cosa</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> reducir el tamaño y el anidamiento de cada función.</p>
+      <ol>
+        <li>Localiza los bloques dentro de <code>if</code>, <code>else</code> y <code>while</code>.</li>
+        <li>Extrae cada bloque a una función con un nombre que describa su intención.</li>
+        <li>Repite hasta que el sangrado no supere dos niveles.</li>
+        <li>Comprueba que cada función está en un único nivel de abstracción.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> funciones de menos de 20 líneas que se leen como una lista de pasos.</p>
+      <p class="small"><strong>Si algo falla:</strong> si no encuentras un nombre honesto para la función extraída, probablemente estás mezclando dos responsabilidades.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 4 · Reducir y agrupar argumentos</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> que las firmas sean fáciles de usar y difíciles de equivocar.</p>
+      <ol>
+        <li>Cuenta los argumentos de cada función pública.</li>
+        <li>Si hay tres o más relacionados, agrúpalos en un objeto con nombre propio.</li>
+        <li>Si hay un booleano, divide la función en dos.</li>
+        <li>Elimina los parámetros de salida devolviendo el resultado.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> firmas de cero, uno o dos argumentos con significado evidente.</p>
+      <p class="small"><strong>Si algo falla:</strong> si agrupar los parámetros genera una clase sin comportamiento, revisa si en realidad estás ante una estructura de datos legítima.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 5 · Separar consultas de comandos</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> que quien lee sepa si una llamada cambia el estado o solo responde a una pregunta.</p>
+      <ol>
+        <li>Busca funciones que devuelvan un valor y además modifiquen el estado.</li>
+        <li>Divide cada una en una consulta (<code>attributeExists</code>) y un comando (<code>setAttribute</code>).</li>
+        <li>Actualiza las llamadas para usar ambas de forma explícita.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> ninguna función ambigua que pueda leerse como verbo o como adjetivo.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 6 · Sustituir códigos de error por excepciones</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> separar el camino feliz de la gestión de fallos.</p>
+      <ol>
+        <li>Localiza las funciones que devuelven códigos como <code>-1</code> o <code>E_ERROR</code>.</li>
+        <li>Crea una excepción concreta con un mensaje útil.</li>
+        <li>Lánzala en lugar de devolver el código.</li>
+        <li>Deja que el llamador decida si capturarla o propagarla.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> el algoritmo principal se lee sin condicionales de error intercaladas.</p>
+      <p class="small"><strong>Si algo falla:</strong> si la firma <code>throws</code> se propaga por media aplicación, estás usando excepciones comprobadas; cámbialas por no comprobadas.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 7 · Eliminar el null del diseño</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> que ninguna llamada pueda reventar por un valor ausente.</p>
+      <ol>
+        <li>Localiza los <code>return null</code>.</li>
+        <li>Si el resultado es una colección, devuelve una colección vacía.</li>
+        <li>Si el resultado es un objeto, aplica el patrón de Caso Especial.</li>
+        <li>Si la ausencia es un error, lanza una excepción.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> desaparecen las cadenas de <code>if (x != null)</code> defensivas.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 8 · Limpiar comentarios</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> que los comentarios aporten información que el código no puede dar.</p>
+      <ol>
+        <li>Borra todo el código comentado.</li>
+        <li>Elimina los comentarios que repiten lo que ya dice el código.</li>
+        <li>Quita los marcadores de cierre de llave.</li>
+        <li>Conserva solo avisos, licencias, TODOs justificados e intenciones de diseño.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> cada comentario que queda responde a un «por qué» que el código no responde.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 9 · Aplicar formato vertical</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> que el archivo se lea como un artículo de prensa.</p>
+      <ol>
+        <li>Separa con una línea en blanco los conceptos independientes.</li>
+        <li>Coloca las variables locales junto a su primer uso.</li>
+        <li>Coloca las variables de instancia al principio de la clase.</li>
+        <li>Sitúa la función que llama justo encima de la función llamada.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> el archivo se recorre de arriba abajo sin saltos hacia atrás.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 10 · Respetar la Ley de Demeter</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> reducir el acoplamiento entre objetos.</p>
+      <ol>
+        <li>Busca cadenas de llamadas del tipo <code>a.getB().getC().hacer()</code>.</li>
+        <li>Pide al objeto contenedor que realice la acción por ti.</li>
+        <li>Añade un método en el contenedor con un nombre que exprese la intención completa.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> ningún «choque de trenes» en el código.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 11 · Cubrir con pruebas limpias</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> poder refactorizar sin miedo.</p>
+      <ol>
+        <li>Escribe una prueba que falle antes de cambiar el comportamiento.</li>
+        <li>Estructúrala en Generar / Operar / Comprobar.</li>
+        <li>Comprueba que es rápida, independiente, repetible, auto-validable y puntual.</li>
+        <li>Refactoriza también el código de las pruebas.</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> una suite que se ejecuta en segundos y en la que confías.</p>
+    </div>
+  </details>
+
+  <details class="acc">
+    <summary>Paso 12 · Ejecutar la checklist final</summary>
+    <div class="accbody">
+      <p><strong>Objetivo:</strong> no entregar nada sin revisar.</p>
+      <ol>
+        <li>Nombres: ¿revelan la intención sin comentarios?</li>
+        <li>Tamaño: ¿funciones de menos de 20 líneas con sangrado ≤ 2 niveles?</li>
+        <li>Responsabilidad: ¿cada función y clase hace una sola cosa?</li>
+        <li>Parámetros: ¿de 0 a 2 argumentos, sin banderas ni salidas?</li>
+        <li>Errores: ¿excepciones no comprobadas, sin <code>null</code>, con <code>try/catch</code> aislado?</li>
+        <li>Comentarios: ¿eliminado el código comentado y lo redundante?</li>
+        <li>Estructura: ¿sin choques de trenes?</li>
+        <li>Pruebas: ¿F.I.R.S.T., TDD y Given-When-Then?</li>
+        <li>Diseño: ¿sin duplicación y con la Regla del Boy Scout aplicada?</li>
+      </ol>
+      <p><strong>Resultado esperado:</strong> puedes marcar las nueve casillas sin excepciones.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============================ PRÁCTICA ============================ -->
+<section class="sec" id="s3" data-t="Práctica guiada">
+  <h2>Práctica guiada</h2>
+  <p class="lead">Cinco ejercicios cortos para fijar lo aprendido. Intenta resolverlos por tu cuenta antes de abrir la solución.</p>
+
+  <h3>Ejercicio 1 · Nombres con intención</h3>
+  <div class="card">
+    <p>Renombra los siguientes identificadores para que revelen su intención:</p>
+    <div class="codewrap">
+      <button class="copy" type="button">COPIAR</button>
+      <pre><code>int d;                    // días transcurridos
+List&lt;Cliente&gt; cl;         // lista de clientes
+String nameString;        // nombre del usuario
+boolean f;                // ¿está activo?
+double TAX;               // 0.21</code></pre>
+    </div>
+    <details class="acc">
+      <summary>Ver solución razonada</summary>
+      <div class="accbody">
+        <div class="codewrap">
+          <button class="copy" type="button">COPIAR</button>
+          <pre><code>int elapsedTimeInDays;
+List&lt;Cliente&gt; clientes;        // sin "List" en el nombre
+String nombre;
+boolean activo;                // o isActive()
+double IVA_GENERAL;            // el número mágico pasa a constante</code></pre>
+        </div>
+        <p><strong>Por qué:</strong> el primero responde a «¿por qué existe?»; el segundo elimina el tipo del nombre; el tercero quita la palabra de relleno <code>String</code>; el cuarto expresa una pregunta booleana; el quinto convierte un número mágico en una constante buscable.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3>Ejercicio 2 · Refactorizar una función sucia</h3>
+  <div class="card">
+    <p>La siguiente función acumula seis problemas distintos. Localízalos y refactoriza:</p>
+    <div class="codewrap">
+      <button class="copy" type="button">COPIAR</button>
+      <pre><code>function p(l, vip, r) {
+  let t = 0;
+  for (let i = 0; i &lt; l.length; i++) {
+    let v = l[i];
+    if (vip) { t = t + v * 0.9; }
+    else { t = t + v; }
+  }
+  if (t &gt; 100) { t = t * 0.95; }
+  r[0] = t;
+  return t;
+}</code></pre>
+    </div>
+    <p class="small">Problemas: nombre ilegible · argumento bandera · argumento de salida · números mágicos · más de una responsabilidad · mezcla de consulta y comando.</p>
+    <details class="acc">
+      <summary>Ver solución razonada</summary>
+      <div class="accbody">
+        <div class="codewrap">
+          <button class="copy" type="button">COPIAR</button>
+          <pre><code>const DESCUENTO_VIP = 0.10;
+const UMBRAL_DESCUENTO = 100;
+const DESCUENTO_POR_VOLUMEN = 0.05;
+
+function calcularTotal(lineas, cliente) {
+  const subtotal = sumarLineas(lineas);
+  const conDescuentoVip = aplicarDescuentoVip(subtotal, cliente);
+  return aplicarDescuentoPorVolumen(conDescuentoVip);
+}
+
+function sumarLineas(lineas) {
+  return lineas.reduce((total, linea) =&gt; total + linea.importe, 0);
+}
+
+function aplicarDescuentoVip(importe, cliente) {
+  return cliente.esVip ? importe * (1 - DESCUENTO_VIP) : importe;
+}
+
+function aplicarDescuentoPorVolumen(importe) {
+  return importe &gt; UMBRAL_DESCUENTO
+    ? importe * (1 - DESCUENTO_POR_VOLUMEN)
+    : importe;
+}</code></pre>
+        </div>
+        <p><strong>Qué se ha corregido:</strong></p>
+        <ul>
+          <li>Los nombres ahora revelan intención (<code>calcularTotal</code>, <code>lineas</code>, <code>cliente</code>).</li>
+          <li>Desaparece el argumento bandera: el descuento VIP es una función propia.</li>
+          <li>Desaparece el argumento de salida <code>r</code>: la función devuelve el resultado.</li>
+          <li>Los números mágicos se convierten en constantes con nombre.</li>
+          <li>La función principal tiene tres líneas y delega cada paso.</li>
+          <li>Aplicar el porcentaje VIP por línea o al total es equivalente, porque el porcentaje es uniforme.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <h3>Ejercicio 3 · Limpiar comentarios</h3>
+  <div class="card">
+    <div class="codewrap">
+      <button class="copy" type="button">COPIAR</button>
+      <pre><code>// incrementar el contador
+i++;
+
+// if (usuario.activo) {
+//     enviarCorreo(usuario);
+// }
+
+for (const item of items) {
+  procesar(item);
+} // end for
+
+// Autor: yo, 12/03/2019
+function calcular() { ... }</code></pre>
+    </div>
+    <details class="acc">
+      <summary>Ver solución razonada</summary>
+      <div class="accbody">
+        <div class="codewrap">
+          <button class="copy" type="button">COPIAR</button>
+          <pre><code>i++;
+
+for (const item of items) {
+  procesar(item);
+}
+
+function calcular() { ... }</code></pre>
+        </div>
+        <p><strong>Por qué:</strong> el primero es redundante; el segundo es código comentado que debe borrarse (Git conserva el historial); el tercero marca el cierre de un bucle que además debería ser corto; el cuarto es un historial de autoría que pertenece al sistema de control de versiones.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3>Ejercicio 4 · Errores y null</h3>
+  <div class="card">
+    <div class="codewrap">
+      <button class="copy" type="button">COPIAR</button>
+      <pre><code>function buscarCliente(id) {
+  const cliente = bd.buscar(id);
+  if (cliente === null) {
+    return null;
+  }
+  return cliente;
+}</code></pre>
+    </div>
+    <details class="acc">
+      <summary>Ver solución razonada</summary>
+      <div class="accbody">
+        <div class="codewrap">
+          <button class="copy" type="button">COPIAR</button>
+          <pre><code>function buscarCliente(id) {
+  const cliente = bd.buscar(id);
+  if (cliente === null) {
+    throw new ClienteNoEncontrado(id);
+  }
+  return cliente;
+}</code></pre>
+        </div>
+        <p><strong>Por qué:</strong> devolver <code>null</code> obliga a quien llama a comprobarlo una y otra vez y traslada el problema hacia arriba. Si la ausencia es un error de negocio, una excepción concreta lo expresa mejor. Si la ausencia fuera normal, aplicarías el patrón de Caso Especial.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3>Ejercicio 5 · Checklist de autoevaluación</h3>
+  <div class="card">
+    <p>Marca las casillas a medida que apliques cada punto a tu propio código. El estado se guarda en tu navegador.</p>
+    <p class="small" id="chkcount">0 de 9 completadas</p>
+    <label class="chk"><input type="checkbox" data-k="p1"> Los nombres revelan la intención sin necesitar comentarios.</label>
+    <label class="chk"><input type="checkbox" data-k="p2"> Las funciones tienen menos de 20 líneas y sangrado máximo de dos niveles.</label>
+    <label class="chk"><input type="checkbox" data-k="p3"> Cada función y cada clase tiene una única responsabilidad.</label>
+    <label class="chk"><input type="checkbox" data-k="p4"> Las funciones tienen de 0 a 2 argumentos, sin banderas ni parámetros de salida.</label>
+    <label class="chk"><input type="checkbox" data-k="p5"> Uso excepciones no comprobadas y no devuelvo ni paso null.</label>
+    <label class="chk"><input type="checkbox" data-k="p6"> He eliminado el código comentado y los comentarios redundantes.</label>
+    <label class="chk"><input type="checkbox" data-k="p7"> No hay cadenas de llamadas que violen la Ley de Demeter.</label>
+    <label class="chk"><input type="checkbox" data-k="p8"> Existe una suite de pruebas F.I.R.S.T. con estructura Given-When-Then.</label>
+    <label class="chk"><input type="checkbox" data-k="p9"> He eliminado la duplicación y aplicado la Regla del Boy Scout.</label>
+  </div>
+</section>
+
+<!-- ============================ 33 PREGUNTAS ============================ -->
+<section class="sec" id="s4" data-t="33 Preguntas (Q&amp;A)">
+  <h2>33 Preguntas (Q&amp;A)</h2>
+  <p class="lead">Treinta y tres preguntas ordenadas por dificultad creciente, con respuestas directas y basadas en los conceptos anteriores.</p>
+
+  <div class="lvl">Nivel básico · preguntas 1 a 11</div>
+
+  <div class="qa"><h3><span class="qnum">1</span> ¿Qué es el código limpio?</h3>
+  <p>Es código que cualquier desarrollador puede leer, entender y modificar sin explicaciones externas. Revela su intención mediante nombres claros, hace una sola cosa en cada unidad, no esconde efectos secundarios y está respaldado por pruebas.</p></div>
+
+  <div class="qa"><h3><span class="qnum">2</span> ¿Por qué se dice que el código se lee muchas más veces de las que se escribe?</h3>
+  <p>Porque cada corrección, cada nueva funcionalidad y cada depuración obligan a leer el código existente antes de tocarlo. La escritura ocurre una vez; la lectura, durante toda la vida del sistema.</p></div>
+
+  <div class="qa"><h3><span class="qnum">3</span> ¿Qué es la Regla del Boy Scout?</h3>
+  <p><em>«Deja el código más limpio de lo que lo encontraste»</em>. Cada modificación, aunque sea pequeña, debe dejar el módulo en un estado superior de limpieza y orden.</p></div>
+
+  <div class="qa"><h3><span class="qnum">4</span> ¿Qué tres preguntas debe responder el nombre de una variable?</h3>
+  <p><strong>¿Por qué existe?</strong>, <strong>¿qué hace?</strong> y <strong>¿cómo se usa?</strong>. Si necesita un comentario para explicarse, el nombre ha fallado.</p></div>
+
+  <div class="qa"><h3><span class="qnum">5</span> ¿Por qué es mala idea escribir <code>int d; // días transcurridos</code>?</h3>
+  <p>Porque el nombre <code>d</code> no comunica nada y se delega la explicación a un comentario que puede quedar desactualizado. Lo correcto es <code>elapsedTimeInDays</code>: el nombre se explica solo.</p></div>
+
+  <div class="qa"><h3><span class="qnum">6</span> ¿Qué son las palabras de relleno en los nombres y por qué hay que evitarlas?</h3>
+  <p>Son términos vacíos como <code>Data</code>, <code>Info</code>, <code>Object</code> o <code>Value</code>, o la repetición del tipo (<code>nameString</code>). No aportan información y alargan el nombre sin mejorar la comprensión: <code>CustomerData</code> es simplemente <code>Customer</code>.</p></div>
+
+  <div class="qa"><h3><span class="qnum">7</span> ¿Cuál es la primera regla de las funciones?</h3>
+  <p>Que deben ser reducidas: idealmente menos de 20 líneas. La segunda regla es que deben ser aún más reducidas.</p></div>
+
+  <div class="qa"><h3><span class="qnum">8</span> ¿Qué significa que una función haga «una sola cosa»?</h3>
+  <p>Que todas sus instrucciones están exactamente <strong>un nivel de abstracción por debajo</strong> del nombre de la función. Si puedes extraer otra función cuyo nombre no sea una simple reconfiguración de la implementación, la original hacía más de una cosa.</p></div>
+
+  <div class="qa"><h3><span class="qnum">9</span> ¿Cuántos argumentos debería tener idealmente una función?</h3>
+  <p>Cero es lo óptimo; uno es habitual para consultas o transformaciones; dos es aceptable si hay una cohesión natural (<code>Point(x, y)</code>); tres exige justificación; cuatro o más está prohibido salvo excepciones extremas.</p></div>
+
+  <div class="qa"><h3><span class="qnum">10</span> ¿Por qué un argumento booleano es una mala práctica?</h3>
+  <p>Porque indica que la función hace dos cosas distintas según el valor del booleano. Se resuelve dividiéndola en dos funciones con nombres propios: <code>renderForSuite()</code> y <code>renderForSingleTest()</code>.</p></div>
+
+  <div class="qa"><h3><span class="qnum">11</span> ¿Qué es un número mágico y cómo se evita?</h3>
+  <p>Un valor literal sin explicación, como <code>5</code> o <code>0.21</code>, incrustado en el código. Se evita extrayéndolo a una constante con nombre buscable: <code>WORK_DAYS_PER_WEEK</code>, <code>IVA_GENERAL</code>.</p></div>
+
+  <div class="lvl">Nivel intermedio · preguntas 12 a 22</div>
+
+  <div class="qa"><h3><span class="qnum">12</span> ¿Qué es la Regla Descendente (Stepdown Rule)?</h3>
+  <p>El código debe leerse de arriba abajo como una serie de párrafos «PARA», descendiendo un nivel de abstracción en cada paso: primero la intención general y después los detalles de implementación.</p></div>
+
+  <div class="qa"><h3><span class="qnum">13</span> ¿Cómo se oculta una sentencia <code>switch</code>?</h3>
+  <p>Colocándola una única vez dentro de una <strong>Factoría Abstracta</strong> que instancia objetos polimórficos. El resto del sistema trabaja con la abstracción, de modo que se respetan SRP y OCP.</p></div>
+
+  <div class="qa"><h3><span class="qnum">14</span> ¿Qué es un efecto secundario en una función?</h3>
+  <p>Una modificación oculta del estado global o de variables de clase que no se anuncia en el nombre de la función. Rompe la confianza del lector y produce fallos difíciles de rastrear.</p></div>
+
+  <div class="qa"><h3><span class="qnum">15</span> ¿Qué es el principio CQS (separación de consultas y comandos)?</h3>
+  <p>Una función debe <strong>hacer algo</strong> (cambiar el estado) o <strong>responder a algo</strong> (devolver información), pero nunca ambas cosas. Así se elimina la ambigüedad de llamadas como <code>if (set(...))</code>.</p></div>
+
+  <div class="qa"><h3><span class="qnum">16</span> ¿Por qué usar excepciones en lugar de códigos de error?</h3>
+  <p>Porque los códigos de error obligan al invocador a evaluar condicionales anidadas inmediatamente, mezclando la lógica de negocio con la gestión de fallos. Las excepciones separan ambos caminos.</p></div>
+
+  <div class="qa"><h3><span class="qnum">17</span> ¿Por qué se prefieren las excepciones no comprobadas?</h3>
+  <p>Porque las comprobadas rompen el Principio Abierto/Cerrado y la encapsulación: una excepción lanzada en un nivel inferior obliga a modificar la firma <code>throws</code> de todos los métodos intermedios de la cadena de llamadas.</p></div>
+
+  <div class="qa"><h3><span class="qnum">18</span> ¿Cómo deben estructurarse los bloques <code>try/catch</code>?</h3>
+  <p>El <code>try</code> debe ser la primera instrucción de la función y no debe haber nada después de los <code>catch</code>/<code>finally</code>. Los cuerpos de <code>try</code> y <code>catch</code> se extraen a funciones privadas independientes, porque la gestión de errores es una responsabilidad única.</p></div>
+
+  <div class="qa"><h3><span class="qnum">19</span> ¿Por qué no devolver <code>null</code> y qué alternativas hay?</h3>
+  <p>Porque genera verificaciones defensivas por todas partes y causa <code>NullPointerException</code>. Alternativas: devolver una colección vacía, aplicar el patrón de Caso Especial (<em>Null Object</em>) o lanzar una excepción representativa. Tampoco debe pasarse <code>null</code> como argumento salvo que una API externa lo exija.</p></div>
+
+  <div class="qa"><h3><span class="qnum">20</span> ¿Qué comentarios son válidos y cuáles deben eliminarse?</h3>
+  <p><strong>Válidos:</strong> licencias y copyright obligatorios, advertencias de consecuencias importantes, <code>// TODO</code> justificados y revisiones periódicas, y la explicación de una decisión de diseño no evidente. <strong>Inaceptables:</strong> código comentado, comentarios redundantes, marcas de cierre de llave e historiales de cambios o autoría.</p></div>
+
+  <div class="qa"><h3><span class="qnum">21</span> ¿Qué es la Ley de Demeter y qué es un choque de trenes?</h3>
+  <p>La Ley de Demeter dice que un módulo solo debe hablar con sus amigos inmediatos. Un «choque de trenes» es una cadena como <code>ctxt.getOptions().getScratchDir().getAbsolutePath()</code>, que revela la estructura interna de varios objetos. Se resuelve delegando la acción en el contenedor.</p></div>
+
+  <div class="qa"><h3><span class="qnum">22</span> ¿Cuál es la diferencia entre un objeto y una estructura de datos?</h3>
+  <p>El objeto oculta sus datos tras abstracciones y expone funciones operativas; facilita añadir nuevos tipos sin tocar las funciones existentes. La estructura de datos expone sus datos y carece de comportamiento significativo; facilita añadir nuevas funciones sin tocar las estructuras. Las clases híbridas, que mezclan ambas cosas, deben evitarse.</p></div>
+
+  <div class="lvl">Nivel avanzado · preguntas 23 a 33</div>
+
+  <div class="qa"><h3><span class="qnum">23</span> ¿Cómo se mide el tamaño de una clase y qué es SRP a nivel de clase?</h3>
+  <p>Se mide en responsabilidades, no en líneas: una clase debe tener una sola razón para cambiar. Si no puedes nombrarla de forma precisa en 25 palabras sin usar «y», «o», «si» o «pero», tiene demasiado volumen.</p></div>
+
+  <div class="qa"><h3><span class="qnum">24</span> ¿Qué es la cohesión y cuándo hay que dividir una clase?</h3>
+  <p>La cohesión es el grado en que los métodos de una clase manipulan sus variables de instancia. Es alta cuando la mayoría de los métodos usa la mayoría de las variables. Cuando la cohesión baja, la clase está asumiendo varias responsabilidades y debe dividirse.</p></div>
+
+  <div class="qa"><h3><span class="qnum">25</span> ¿Qué es OCP y cómo se relaciona con la factoría y el <code>switch</code>?</h3>
+  <p>El Principio Abierto/Cerrado establece que el código debe estar abierto a la extensión y cerrado a la modificación. Una <code>switch</code> central repetida obliga a modificar el mismo punto por cada tipo nuevo; al ocultarla en una factoría abstracta, añadir un tipo nuevo solo requiere una nueva clase.</p></div>
+
+  <div class="qa"><h3><span class="qnum">26</span> ¿Qué es el Principio de Inversión de Dependencias (DIP)?</h3>
+  <p>Consiste en depender de abstracciones (interfaces) y no de detalles concretos. Así los módulos de alto nivel no quedan atados a implementaciones específicas y se pueden sustituir sin reescribir la lógica.</p></div>
+
+  <div class="qa"><h3><span class="qnum">27</span> ¿Cuáles son las cuatro reglas del diseño sencillo de Kent Beck y en qué orden se aplican?</h3>
+  <p>En orden estricto de prioridad: <strong>1)</strong> ejecuta todas las pruebas; <strong>2)</strong> no contiene duplicados (DRY); <strong>3)</strong> expresa la intención del programador; <strong>4)</strong> minimiza el número de clases y métodos. El orden importa: no tiene sentido optimizar la expresividad de un sistema que no funciona.</p></div>
+
+  <div class="qa"><h3><span class="qnum">28</span> ¿Cuáles son las tres leyes del TDD?</h3>
+  <p><strong>1)</strong> No crearás código de producción hasta haber redactado una prueba que falle. <strong>2)</strong> No crearás más de una prueba que baste como fallida (no compilar cuenta como fallo). <strong>3)</strong> No crearás más código de producción que el necesario para superar la prueba de fallo actual.</p></div>
+
+  <div class="qa"><h3><span class="qnum">29</span> ¿Qué significa F.I.R.S.T.?</h3>
+  <p><strong>Fast</strong> (rápidas), <strong>Independent</strong> (independientes entre sí), <strong>Repeatable</strong> (repetibles en cualquier entorno), <strong>Self-Validating</strong> (devuelven pasa o falla) y <strong>Timely</strong> (escritas justo antes del código de producción).</p></div>
+
+  <div class="qa"><h3><span class="qnum">30</span> ¿Qué es el patrón Given-When-Then o AAA?</h3>
+  <p>Es la estructura limpia de una prueba en tres fases: <strong>Generar</strong> (Arrange: construir los datos), <strong>Operar</strong> (Act: ejecutar la operación) y <strong>Comprobar</strong> (Assert: verificar el resultado esperado).</p></div>
+
+  <div class="qa"><h3><span class="qnum">31</span> ¿Por qué el código de pruebas debe mantenerse limpio?</h3>
+  <p>Porque el código de prueba es tan importante como el de producción. Sin pruebas limpias se pierde la flexibilidad del código de producción y el miedo al cambio paraliza la refactorización. Las pruebas sucias acaban siendo abandonadas.</p></div>
+
+  <div class="qa"><h3><span class="qnum">32</span> ¿Qué es el patrón de Caso Especial (Null Object)?</h3>
+  <p>Es una alternativa a devolver <code>null</code>: se devuelve un objeto que representa el caso «sin resultado» y que responde a la misma interfaz con un comportamiento neutro. Así el llamador no necesita comprobaciones defensivas.</p></div>
+
+  <div class="qa"><h3><span class="qnum">33</span> ¿Cómo se escribe código concurrente limpio?</h3>
+  <p>Aislando el código concurrente del código de lógica de negocio en POJOs independientes, limitando el acceso a los datos compartidos mediante encapsulación y secciones críticas mínimas, usando copias de solo lectura para evitar sincronización y diseñando hilos que operen sobre subconjuntos de datos independientes sin compartir estado.</p></div>
+</section>
+
+<!-- ============================ ERRORES ============================ -->
+<section class="sec" id="s5" data-t="Errores comunes">
+  <h2>Errores comunes</h2>
+  <p class="lead">Los diez antipatrones que más aparecen en código real, con su corrección correspondiente.</p>
+
+  <div class="card bad">
+    <h3>1. Nombres que no dicen nada</h3>
+    <p><strong>❌</strong> <code>int d;</code>, <code>function p()</code>, <code>let x = 5</code><br>
+    <strong>✅</strong> <code>elapsedTimeInDays</code>, <code>calcularTotal()</code>, <code>WORK_DAYS_PER_WEEK</code></p>
+  </div>
+
+  <div class="card bad">
+    <h3>2. Funciones que hacen de todo</h3>
+    <p><strong>❌</strong> Una función de 120 líneas que valida, calcula, guarda e imprime.<br>
+    <strong>✅</strong> Cuatro funciones pequeñas, cada una en un único nivel de abstracción.</p>
+  </div>
+
+  <div class="card bad">
+    <h3>3. Argumentos bandera</h3>
+    <p><strong>❌</strong> <code>enviarCorreo(usuario, true)</code><br>
+    <strong>✅</strong> <code>enviarCorreoDeBienvenida(usuario)</code> y <code>enviarCorreoDeAviso(usuario)</code></p>
+  </div>
+
+  <div class="card bad">
+    <h3>4. Argumentos de salida</h3>
+    <p><strong>❌</strong> <code>calcularTotal(lineas, resultado)</code><br>
+    <strong>✅</strong> <code>const total = calcularTotal(lineas)</code></p>
+  </div>
+
+  <div class="card bad">
+    <h3>5. Comentar en vez de reescribir</h3>
+    <p><strong>❌</strong> <code>// esta función suma los importes y aplica el IVA</code><br>
+    <strong>✅</strong> Renombrar la función a <code>calcularTotalConIva()</code> y borrar el comentario.</p>
+  </div>
+
+  <div class="card bad">
+    <h3>6. Devolver <code>null</code></h3>
+    <p><strong>❌</strong> <code>return null;</code> y luego diez comprobaciones defensivas.<br>
+    <strong>✅</strong> Colección vacía, objeto nulo especial o excepción concreta.</p>
+  </div>
+
+  <div class="card bad">
+    <h3>7. Choques de trenes</h3>
+    <p><strong>❌</strong> <code>pedido.getCliente().getDireccion().getCalle()</code><br>
+    <strong>✅</strong> <code>pedido.calleDeEntrega()</code></p>
+  </div>
+
+  <div class="card bad">
+    <h3>8. Clases híbridas</h3>
+    <p><strong>❌</strong> Una clase con lógica de negocio que además expone todos sus campos con <em>getters</em> y <em>setters</em> indiscriminados.<br>
+    <strong>✅</strong> O un objeto que oculta sus datos, o una estructura de datos explícita, nunca ambas cosas.</p>
+  </div>
+
+  <div class="card bad">
+    <h3>9. Pruebas sucias</h3>
+    <p><strong>❌</strong> Pruebas gigantes con diez aserciones, dependientes entre sí y lentas.<br>
+    <strong>✅</strong> Pruebas F.I.R.S.T. con un único concepto lógico y estructura Given-When-Then.</p>
+  </div>
+
+  <div class="card bad">
+    <h3>10. Concurrencia mezclada con la lógica de negocio</h3>
+    <p><strong>❌</strong> Hilos, <code>synchronized</code> y lógica de negocio en la misma clase.<br>
+    <strong>✅</strong> Lógica de negocio en POJOs independientes y concurrencia aislada en su propia capa.</p>
+  </div>
+</section>
+
+<!-- ============================ RESUMEN ============================ -->
+<section class="sec" id="s6" data-t="Resumen">
+  <h2>Resumen</h2>
+  <p class="lead">Lo esencial del tutorial en una sola página, más un glosario y la checklist final.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Ideas que debes recordar</h3>
+      <ul>
+        <li>El código se lee mucho más de lo que se escribe.</li>
+        <li>Un nombre que necesita comentario es un nombre fallido.</li>
+        <li>Funciones pequeñas, con pocos argumentos y una sola responsabilidad.</li>
+        <li>Excepciones en lugar de códigos de error; nunca <code>null</code>.</li>
+        <li>Los comentarios son un mal necesario: úsalos solo cuando aporten un «por qué».</li>
+        <li>Habla solo con tus amigos inmediatos.</li>
+        <li>Sin pruebas limpias no hay refactorización posible.</li>
+        <li>Cuatro reglas de diseño: pruebas, sin duplicación, expresividad, minimalismo.</li>
+        <li>La concurrencia se aísla del negocio.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Checklist final</h3>
+      <label class="chk"><input type="checkbox" data-k="r1"> Nombres que revelan la intención.</label>
+      <label class="chk"><input type="checkbox" data-k="r2"> Funciones de menos de 20 líneas y sangrado ≤ 2 niveles.</label>
+      <label class="chk"><input type="checkbox" data-k="r3"> Una sola responsabilidad por función y por clase.</label>
+      <label class="chk"><input type="checkbox" data-k="r4"> De 0 a 2 argumentos, sin banderas ni salidas.</label>
+      <label class="chk"><input type="checkbox" data-k="r5"> Excepciones no comprobadas, sin <code>null</code>, con <code>try/catch</code> aislado.</label>
+      <label class="chk"><input type="checkbox" data-k="r6"> Sin código comentado ni comentarios redundantes.</label>
+      <label class="chk"><input type="checkbox" data-k="r7"> Sin choques de trenes.</label>
+      <label class="chk"><input type="checkbox" data-k="r8"> Pruebas F.I.R.S.T. con Given-When-Then.</label>
+      <label class="chk"><input type="checkbox" data-k="r9"> Sin duplicación y con la Regla del Boy Scout aplicada.</label>
+    </div>
+  </div>
+
+  <h2>Glosario</h2>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Término</th><th>Definición</th></tr></thead>
+      <tbody>
+        <tr><td>Regla del Boy Scout</td><td>Deja el código más limpio de lo que lo encontraste.</td></tr>
+        <tr><td>Regla Descendente</td><td>Leer el código de arriba abajo, bajando un nivel de abstracción cada vez.</td></tr>
+        <tr><td>Argumento bandera</td><td>Parámetro booleano que hace que una función se comporte de dos formas distintas.</td></tr>
+        <tr><td>Efecto secundario</td><td>Cambio de estado no anunciado en el nombre de la función.</td></tr>
+        <tr><td>CQS</td><td>Command-Query Separation: una función o cambia el estado o devuelve información, nunca ambas.</td></tr>
+        <tr><td>Null Object</td><td>Objeto que representa el caso «sin resultado» con comportamiento neutro.</td></tr>
+        <tr><td>Ley de Demeter</td><td>Habla solo con tus amigos inmediatos, no con desconocidos.</td></tr>
+        <tr><td>SRP</td><td>Single Responsibility Principle: una sola razón para cambiar.</td></tr>
+        <tr><td>OCP</td><td>Open/Closed Principle: abierto a la extensión, cerrado a la modificación.</td></tr>
+        <tr><td>DIP</td><td>Dependency Inversion Principle: depender de abstracciones.</td></tr>
+        <tr><td>DRY</td><td>Don't Repeat Yourself: elimina la duplicación.</td></tr>
+        <tr><td>F.I.R.S.T.</td><td>Fast, Independent, Repeatable, Self-Validating, Timely.</td></tr>
+        <tr><td>Given-When-Then</td><td>Generar, Operar, Comprobar: las tres fases de una prueba limpia.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Siguientes pasos</h3>
+    <ol>
+      <li>Elige un archivo de tu proyecto y aplícale solo el Paso 2 (renombrar) durante una hora.</li>
+      <li>Al día siguiente, aplica el Paso 3 (extraer funciones) sobre el mismo archivo.</li>
+      <li>Escribe una prueba antes de tocar la siguiente funcionalidad.</li>
+      <li>Repite la checklist final antes de cada entrega.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================ FUENTES ============================ -->
+<section class="sec" id="s7" data-t="Fuentes">
+  <h2>Fuentes</h2>
+  <p class="lead">Este tutorial se ha construido exclusivamente a partir del material de referencia proporcionado.</p>
+
+  <div class="card">
+    <h3>Fuente principal</h3>
+    <p><strong>SKILL: Clean Code &amp; Software Craftsmanship para LLMs (v2.0)</strong>. Documento operativo basado en <em>Código Limpio: Manual de estilo para el desarrollo ágil de software</em> de Robert C. Martin (Uncle Bob). Cubre los capítulos 2 a 13 del libro: nombres, funciones, comentarios, formato, objetos y estructuras de datos, errores, pruebas, clases, arquitectura, diseño emergente y concurrencia.</p>
+    <h4>Obra de referencia</h4>
+    <p>Robert C. Martin, <em>Clean Code: A Handbook of Agile Software Craftsmanship</em> (2008). Traducción al castellano: <em>Código Limpio: Manual de estilo para el desarrollo ágil de software</em>, Anaya Multimedia.</p>
+  </div>
+
+  <div class="card">
+    <h3>Nota de verificación</h3>
+    <p>Todo el contenido conceptual de este tutorial procede del documento fuente citado. No se han añadido datos, funciones ni procedimientos ajenos al mismo. Los ejemplos de código se han reescrito en una sintaxis sencilla tipo JavaScript para facilitar la lectura, conservando el significado de los ejemplos originales.</p>
+    <p class="small">No se han podido ejecutar pruebas en un navegador real desde este entorno de generación: las comprobaciones realizadas son de inspección estática del código HTML, CSS y JavaScript, así como de coherencia del contenido con la fuente.</p>
+  </div>
+
+  <div class="card">
+    <h3>Créditos técnicos del documento fuente</h3>
+    <ul>
+      <li><strong>Autor del tutorial:</strong> Rubén Sbarsky.</li>
+      <li><strong>Versión del tutorial:</strong> V001.</li>
+      <li><strong>Fecha de creación:</strong> 27/10/2026 — 09:10:05.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ CRÉDITOS ============================ -->
+<section class="sec" id="s8" data-t="Créditos">
+  <h2>Créditos</h2>
+
+  <div class="hero-wrap">
+    <div class="hero" id="heroCred" role="img" aria-label="Ilustración animada: un cristal hexagonal luminoso representa el código limpio, rodeado de anillos giratorios, nodos de datos y fragmentos de código que se alinean en orden."></div>
+  </div>
+
+  <p>La ilustración representa un núcleo de código limpio: un cristal hexagonal luminoso, estable y simétrico, rodeado por anillos que giran y por fragmentos de código que se alinean hasta formar una estructura ordenada. Los nodos que orbitan simbolizan los datos y las pruebas que mantienen el sistema en movimiento; el haz vertical representa la refactorización continua que atraviesa todo el proyecto.</p>
+
+  <div class="card" style="text-align:center">
+    <p style="font-size:clamp(1.9rem,7vw,2.9rem);font-weight:800;letter-spacing:-.02em;margin:.2rem 0;color:var(--acc);line-height:1.15">Rubén Sbarsky</p>
+    <p style="font-size:1.05rem;margin:.1rem 0 .8rem;color:var(--txt)">Autor del tutorial</p>
+    <p class="small">Tutorial interactivo sobre Clean Code y Software Craftsmanship, elaborado a partir del documento de referencia «SKILL: Clean Code &amp; Software Craftsmanship para LLMs (v2.0)», basado en la obra de Robert C. Martin.</p>
+    <p class="small"><strong>Versión:</strong> V001</p>
+    <p class="small"><strong>Fecha de creación:</strong> 27/10/2026 — 09:10:05</p>
+  </div>
+
+  <div class="card">
+    <h3>Detalles técnicos</h3>
+    <ul>
+      <li>Archivo HTML único, autónomo y sin dependencias externas.</li>
+      <li>HTML, CSS, JavaScript y SVG integrados en el mismo documento.</li>
+      <li>Ilustración SVG animada generada desde una plantilla compartida entre INICIO y CRÉDITOS, con identificadores únicos por instancia.</li>
+      <li>Navegación por pestañas, índice lateral, buscador interno y persistencia del progreso mediante <code>localStorage</code>.</li>
+      <li>Hoja de estilos de impresión preparada para A4 vertical.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<!-- Barra de herramientas inferior -->
+<div id="tools" role="toolbar" aria-label="Herramientas del tutorial">
+  <div class="searchwrap">
+    <input id="q" type="search" placeholder="Buscar en el tutorial…" aria-label="Buscar en el tutorial" autocomplete="off">
+    <div id="qres" role="listbox" aria-label="Resultados de búsqueda"></div>
+  </div>
+  <button class="tbtn" id="fminus" aria-label="Reducir tamaño de letra" title="Reducir tamaño de letra">A−</button>
+  <button class="tbtn" id="fplus" aria-label="Aumentar tamaño de letra" title="Aumentar tamaño de letra">A+</button>
+  <button class="tbtn" id="theme" aria-label="Cambiar entre tema oscuro y claro" title="Tema claro / oscuro">◐</button>
+  <button class="tbtn" id="print" aria-label="Imprimir o guardar como PDF" title="Imprimir / PDF">⎙</button>
+  <button class="tbtn" id="top" aria-label="Volver arriba" title="Volver arriba">↑</button>
+</div>
+
+<!-- Plantilla SVG única (se elimina del DOM tras extraerla) -->
+<template id="heroSrc">
+<svg viewBox="0 0 800 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hc-title hc-desc" preserveAspectRatio="xMidYMid meet">
+  <title id="hc-title">Núcleo de código limpio</title>
+  <desc id="hc-desc">Un cristal hexagonal luminoso representa el código limpio. A su alrededor giran anillos, orbitan nodos de datos y flotan fragmentos de código que se alinean formando una estructura ordenada.</desc>
+  <defs>
+    <radialGradient id="hc-bg" cx="50%" cy="42%" r="72%">
+      <stop offset="0%" stop-color="#0d2440"/>
+      <stop offset="60%" stop-color="#08111f"/>
+      <stop offset="100%" stop-color="#05080f"/>
+    </radialGradient>
+    <linearGradient id="hc-core" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7dd3fc"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="hc-edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="hc-beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity=".9"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="hc-halo">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity=".55"/>
+      <stop offset="70%" stop-color="#38bdf8" stop-opacity=".12"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="hc-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="hc-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#1e3a5f" stroke-width="1"/>
+      <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="40 40" dur="9s" repeatCount="indefinite"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="900" fill="url(#hc-bg)"/>
+  <rect width="800" height="900" fill="url(#hc-grid)" opacity=".45"/>
+
+  <circle cx="400" cy="430" r="248" fill="url(#hc-halo)">
+    <animate attributeName="r" values="228;268;228" dur="7s" repeatCount="indefinite"/>
+  </circle>
+
+  <rect x="396" y="90" width="8" height="720" fill="url(#hc-beam)" opacity=".35">
+    <animate attributeName="opacity" values=".12;.55;.12" dur="5s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="398" y="150" width="4" height="580" fill="#7dd3fc" opacity=".22">
+    <animate attributeName="opacity" values=".08;.4;.08" dur="3.5s" repeatCount="indefinite"/>
+  </rect>
+
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="0 400 430" to="360 400 430" dur="28s" repeatCount="indefinite"/>
+    <ellipse cx="400" cy="430" rx="252" ry="84" fill="none" stroke="#38bdf8" stroke-opacity=".28" stroke-width="1.4"/>
+    <circle cx="652" cy="430" r="6" fill="#38bdf8" filter="url(#hc-glow)"/>
+  </g>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="360 400 430" to="0 400 430" dur="40s" repeatCount="indefinite"/>
+    <ellipse cx="400" cy="430" rx="196" ry="196" fill="none" stroke="#a78bfa" stroke-opacity=".18" stroke-width="1.2" stroke-dasharray="5 9"/>
+    <circle cx="400" cy="234" r="4.5" fill="#a78bfa" filter="url(#hc-glow)"/>
+  </g>
+
+  <circle cx="400" cy="430" r="230" fill="none" stroke="#1e3a5f" stroke-width="1.4" stroke-dasharray="3 11">
+    <animateTransform attributeName="transform" type="rotate" from="360 400 430" to="0 400 430" dur="55s" repeatCount="indefinite"/>
+  </circle>
+
+  <g filter="url(#hc-glow)">
+    <polygon points="520,430 460,534 340,534 280,430 340,326 460,326" fill="#0b1c30" fill-opacity=".6" stroke="url(#hc-edge)" stroke-width="2.6">
+      <animate attributeName="stroke-opacity" values=".55;1;.55" dur="4.5s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="0 400 430" to="360 400 430" dur="22s" repeatCount="indefinite"/>
+    <polygon points="495,430 447.5,512.3 352.5,512.3 305,430 352.5,347.7 447.5,347.7" fill="none" stroke="#7dd3fc" stroke-width="1.1" stroke-opacity=".55"/>
+  </g>
+
+  <circle cx="400" cy="430" r="46" fill="url(#hc-core)" opacity=".92" filter="url(#hc-glow)">
+    <animate attributeName="r" values="42;50;42" dur="3.4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="400" cy="430" r="66" fill="none" stroke="#7dd3fc" stroke-width="1.6">
+    <animate attributeName="r" values="60;88;60" dur="3.8s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-opacity" values=".75;0;.75" dur="3.8s" repeatCount="indefinite"/>
+  </circle>
+  <path d="M382 432 l13 14 l27 -30" fill="none" stroke="#04121f" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>
+
+  <text x="118" y="478" font-size="130" fill="#1e3a5f" font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="middle">&#123;<animate attributeName="opacity" values=".3;.9;.3" dur="6s" repeatCount="indefinite"/></text>
+  <text x="682" y="478" font-size="130" fill="#1e3a5f" font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="middle">&#125;<animate attributeName="opacity" values=".9;.3;.9" dur="6s" repeatCount="indefinite"/></text>
+
+  <g fill="#38bdf8">
+    <rect class="hbar" x="78" y="252" width="96" height="7" rx="3.5" style="animation-delay:.2s"/>
+    <rect class="hbar" x="86" y="276" width="64" height="7" rx="3.5" style="animation-delay:1.1s"/>
+    <rect class="hbar" x="72" y="300" width="110" height="7" rx="3.5" style="animation-delay:2s"/>
+    <rect class="hbar" x="90" y="324" width="78" height="7" rx="3.5" style="animation-delay:2.9s"/>
+    <rect class="hbar" x="76" y="560" width="104" height="7" rx="3.5" style="animation-delay:.7s"/>
+    <rect class="hbar" x="88" y="584" width="70" height="7" rx="3.5" style="animation-delay:1.6s"/>
+    <rect class="hbar" x="74" y="608" width="92" height="7" rx="3.5" style="animation-delay:2.5s"/>
+  </g>
+  <g fill="#a78bfa">
+    <rect class="hbar" x="626" y="252" width="96" height="7" rx="3.5" style="animation-delay:.5s"/>
+    <rect class="hbar" x="650" y="276" width="64" height="7" rx="3.5" style="animation-delay:1.4s"/>
+    <rect class="hbar" x="618" y="300" width="110" height="7" rx="3.5" style="animation-delay:2.3s"/>
+    <rect class="hbar" x="632" y="324" width="78" height="7" rx="3.5" style="animation-delay:3.1s"/>
+    <rect class="hbar" x="620" y="560" width="104" height="7" rx="3.5" style="animation-delay:1s"/>
+    <rect class="hbar" x="644" y="584" width="70" height="7" rx="3.5" style="animation-delay:1.9s"/>
+    <rect class="hbar" x="630" y="608" width="92" height="7" rx="3.5" style="animation-delay:2.8s"/>
+  </g>
+
+  <g fill="#7dd3fc">
+    <circle class="hpart" cx="190" cy="712" r="3" style="animation-delay:0s"/>
+    <circle class="hpart" cx="255" cy="762" r="2.2" style="animation-delay:1.1s;animation-duration:9s"/>
+    <circle class="hpart" cx="330" cy="726" r="2.6" style="animation-delay:2.3s"/>
+    <circle class="hpart" cx="470" cy="748" r="2.4" style="animation-delay:.6s;animation-duration:10s"/>
+    <circle class="hpart" cx="545" cy="708" r="3" style="animation-delay:1.7s"/>
+    <circle class="hpart" cx="615" cy="758" r="2.2" style="animation-delay:2.9s;animation-duration:9s"/>
+    <circle class="hpart" cx="150" cy="196" r="2.4" style="animation-delay:.9s"/>
+    <circle class="hpart" cx="238" cy="152" r="3" style="animation-delay:2.1s;animation-duration:10s"/>
+    <circle class="hpart" cx="562" cy="168" r="2.6" style="animation-delay:1.4s"/>
+    <circle class="hpart" cx="648" cy="204" r="2.2" style="animation-delay:3.3s;animation-duration:9s"/>
+  </g>
+
+  <rect x="0" y="0" width="800" height="2" fill="#38bdf8" opacity=".3">
+    <animate attributeName="y" values="80;820;80" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;.45;0" dur="12s" repeatCount="indefinite"/>
+  </rect>
+</svg>
+</template>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Utilidades de almacenamiento seguro ---------- */
+  var store = {
+    get: function(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set: function(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  };
+
+  /* ---------- Referencias base ---------- */
+  var secs  = Array.prototype.slice.call(document.querySelectorAll('main > section.sec'));
+  var chips = Array.prototype.slice.call(document.querySelectorAll('#chips .chip'));
+  var dr    = document.getElementById('dr');
+  var mb    = document.getElementById('mb');
+  var cur   = 0;
+
+  /* ---------- Extraer la plantilla SVG y eliminar la fuente ---------- */
+  var heroSrcEl = document.getElementById('heroSrc');
+  var heroTpl = heroSrcEl ? heroSrcEl.innerHTML : '';
+  if (heroSrcEl && heroSrcEl.parentNode) { heroSrcEl.parentNode.removeChild(heroSrcEl); }
+
+  var reduceMotion = false;
+  try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+
+  var heroCount = 0;
+  function mountHeroIn(el){
+    if (!el || !heroTpl) return;
+    if (el.getAttribute('data-mounted') === '1') return;
+    heroCount++;
+    var suf = 'h' + heroCount + '-';
+    el.innerHTML = heroTpl.replace(/hc-/g, suf);
+    el.setAttribute('data-mounted','1');
+    var svg = el.querySelector('svg');
+    if (svg){
+      svg.removeAttribute('width');
+      svg.removeAttribute('height');
+      svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+      if (reduceMotion && typeof svg.pauseAnimations === 'function'){
+        try { svg.pauseAnimations(); } catch(e){}
+      }
+    }
+  }
+  function mountVisibleHeros(){
+    mountHeroIn(document.getElementById('heroHome'));
+    mountHeroIn(document.getElementById('heroCred'));
+  }
+
+  /* ---------- Índice lateral ---------- */
+  function buildDrawer(){
+    secs.forEach(function(s,i){
+      var a = document.createElement('a');
+      a.href = '#';
+      a.textContent = (i ? i + '. ' : '') + (s.dataset.t || (s.querySelector('h2') ? s.querySelector('h2').textContent.trim() : 'Sección'));
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        go(i);
+        tg(false);
+      });
+      dr.appendChild(a);
+    });
+  }
+
+  function tg(v){
+    var open = (typeof v === 'boolean') ? v : !dr.classList.contains('o');
+    dr.classList.toggle('o', open);
+    mb.setAttribute('aria-expanded', String(open));
+    mb.setAttribute('aria-label', open ? 'Cerrar índice' : 'Abrir índice');
+  }
+
+  /* ---------- Navegación ---------- */
+  function go(i){
+    if (isNaN(i)) return;
+    i = Math.max(0, Math.min(secs.length - 1, i));
+    secs.forEach(function(s,j){ s.classList.toggle('on', j === i); });
+    chips.forEach(function(c,j){
+      c.classList.toggle('on', j === i);
+      if (j === i) { c.setAttribute('aria-current','page'); } else { c.removeAttribute('aria-current'); }
+    });
+    var links = dr.children;
+    for (var k = 0; k < links.length; k++){
+      links[k].classList.toggle('on', k === i);
+    }
+    cur = i;
+    store.set('cc_sec', String(i));
+    mountVisibleHeros();
+    window.scrollTo(0,0);
+    updateProgress();
+  }
+
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){ go(parseInt(c.dataset.i,10)); });
+  });
+
+  document.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('[data-go]') : null;
+    if (b){
+      go(parseInt(b.dataset.go,10));
+      closeSearch();
+    }
+  });
+
+  /* Flechas del teclado para navegar entre secciones */
+  document.addEventListener('keydown', function(e){
+    var t = e.target;
+    var tag = t && t.tagName ? t.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || (t && t.isContentEditable)) return;
+    if (e.key === 'ArrowRight'){ go(cur + 1); }
+    else if (e.key === 'ArrowLeft'){ go(cur - 1); }
+  });
+
+  /* ---------- Botón del índice ---------- */
+  mb.addEventListener('click', function(){ tg(); });
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('#dr,#mb,#ix')) tg(false);
+  });
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') tg(false);
+  });
+
+  var ix = document.getElementById('ix');
+  if (ix) ix.addEventListener('click', function(){ tg(true); });
+
+  /* ---------- Buscador interno ---------- */
+  var q = document.getElementById('q');
+  var qres = document.getElementById('qres');
+
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function closeSearch(){ qres.classList.remove('on'); qres.innerHTML = ''; }
+
+  if (q){
+    q.addEventListener('input', function(){
+      var term = q.value.trim().toLowerCase();
+      if (term.length < 2){ closeSearch(); return; }
+      var out = [];
+      secs.forEach(function(s,i){
+        var txt = (s.textContent || '').toLowerCase();
+        var n = 0, idx = 0;
+        while ((idx = txt.indexOf(term, idx)) !== -1){ n++; idx += term.length; }
+        if (n > 0){
+          out.push({ i: i, n: n, t: (i ? i + '. ' : '') + (s.dataset.t || ('Sección ' + i)) });
+        }
+      });
+      if (!out.length){
+        qres.innerHTML = '<div class="qempty">Sin resultados para «' + esc(q.value) + '»</div>';
+        qres.classList.add('on');
+        return;
+      }
+      qres.innerHTML = out.map(function(r){
+        return '<button class="qitem" data-go="' + r.i + '" type="button">' + esc(r.t) +
+               '<span class="qn">' + r.n + '</span></button>';
+      }).join('');
+      qres.classList.add('on');
+    });
+    q.addEventListener('keydown', function(e){
+      if (e.key === 'Escape'){ closeSearch(); q.blur(); }
+    });
+    document.addEventListener('click', function(e){
+      if (!e.target.closest('.searchwrap')) closeSearch();
+    });
+  }
+
+  /* ---------- Copiar bloques de código ---------- */
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('.copy') : null;
+    if (!btn) return;
+    var wrap = btn.closest('.codewrap');
+    var codeEl = wrap ? wrap.querySelector('pre code') : null;
+    if (!codeEl) return;
+    var texto = codeEl.textContent;
+
+    function ok(){
+      var old = btn.textContent;
+      btn.textContent = '✓ COPIADO';
+      btn.classList.add('ok');
+      setTimeout(function(){ btn.textContent = old; btn.classList.remove('ok'); }, 1600);
+    }
+    function fallback(){
+      try{
+        var ta = document.createElement('textarea');
+        ta.value = texto;
+        ta.setAttribute('readonly','');
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var done = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (done) { ok(); }
+        else { window.prompt('Copia el texto manualmente (Ctrl+C, Cmd+C):', texto); }
+      }catch(err){
+        window.prompt('Copia el texto manualmente (Ctrl+C, Cmd+C):', texto);
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(texto).then(ok).catch(fallback);
+    } else {
+      fallback();
+    }
+  });
+
+  /* ---------- Tamaño de letra ---------- */
+  var size = parseInt(store.get('cc_size') || '16', 10);
+  if (isNaN(size)) size = 16;
+  function applySize(){
+    size = Math.max(13, Math.min(21, size));
+    document.documentElement.style.fontSize = size + 'px';
+    store.set('cc_size', String(size));
+  }
+  applySize();
+
+  var fminus = document.getElementById('fminus');
+  var fplus  = document.getElementById('fplus');
+  if (fminus) fminus.addEventListener('click', function(){ size -= 1; applySize(); });
+  if (fplus)  fplus.addEventListener('click',  function(){ size += 1; applySize(); });
+
+  /* ---------- Tema claro / oscuro ---------- */
+  var themeBtn = document.getElementById('theme');
+  var savedTheme = store.get('cc_theme');
+  if (savedTheme === 'light') document.documentElement.classList.add('light');
+  if (themeBtn){
+    themeBtn.addEventListener('click', function(){
+      var isLight = document.documentElement.classList.toggle('light');
+      store.set('cc_theme', isLight ? 'light' : 'dark');
+    });
+  }
+
+  /* ---------- Barra de progreso de lectura ---------- */
+  var pfill = document.getElementById('pfill');
+  function updateProgress(){
+    var doc = document.documentElement;
+    var total = doc.scrollHeight - window.innerHeight;
+    var pct = total > 0 ? (window.scrollY / total) * 100 : 0;
+    if (pfill) pfill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  window.addEventListener('resize', updateProgress);
+
+  /* ---------- Volver arriba ---------- */
+  var topBtn = document.getElementById('top');
+  if (topBtn) topBtn.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ---------- Checklist con persistencia ---------- */
+  var checks = Array.prototype.slice.call(document.querySelectorAll('input[type=checkbox][data-k]'));
+  checks.forEach(function(cb){
+    var key = 'cc_chk_' + cb.dataset.k;
+    if (store.get(key) === '1') cb.checked = true;
+    cb.addEventListener('change', function(){
+      store.set(key, cb.checked ? '1' : '0');
+      updateChkCount();
+    });
+  });
+
+  function updateChkCount(){
+    var counter = document.getElementById('chkcount');
+    if (!counter) return;
+    var total = 0, done = 0;
+    checks.forEach(function(cb){
+      if (cb.dataset.k.indexOf('p') === 0){ total++; if (cb.checked) done++; }
+    });
+    counter.textContent = done + ' de ' + total + ' completadas';
+  }
+  updateChkCount();
+
+  /* ---------- Impresión / PDF ---------- */
+  var savedDetails = null;
+
+  function preparePrint(){
+    savedDetails = [];
+    var ds = document.querySelectorAll('details');
+    for (var i = 0; i < ds.length; i++){
+      savedDetails.push([ds[i], ds[i].open]);
+      ds[i].open = true;
+    }
+    mountHeroIn(document.getElementById('heroHome'));
+    mountHeroIn(document.getElementById('heroCred'));
+  }
+  function restorePrint(){
+    if (!savedDetails) return;
+    for (var i = 0; i < savedDetails.length; i++){
+      savedDetails[i][0].open = savedDetails[i][1];
+    }
+    savedDetails = null;
+    mountVisibleHeros();
+  }
+
+  window.addEventListener('beforeprint', preparePrint);
+  window.addEventListener('afterprint', restorePrint);
+
+  var printBtn = document.getElementById('print');
+  if (printBtn){
+    printBtn.addEventListener('click', function(){
+      try{
+        preparePrint();
+        window.print();
+        setTimeout(restorePrint, 1500);
+      }catch(e){
+        alert('Abre este archivo directamente en el navegador y utiliza Ctrl+P o Cmd+P.');
+      }
+    });
+  }
+
+  /* ---------- Reparación periódica de contenedores SVG vacíos ---------- */
+  function repairHeros(){
+    ['heroHome','heroCred'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (!el) return;
+      var sec = el.closest('section');
+      if (sec && !sec.classList.contains('on')) return;
+      if (!el.querySelector('svg')) { el.removeAttribute('data-mounted'); mountHeroIn(el); }
+    });
+  }
+  setInterval(repairHeros, 1500);
+
+  /* ---------- Inicialización ---------- */
+  buildDrawer();
+
+  var initial = 0;
+  var savedSec = parseInt(store.get('cc_sec') || '0', 10);
+  if (!isNaN(savedSec) && savedSec >= 0 && savedSec < secs.length) initial = savedSec;
+
+  var hash = (location.hash || '').replace('#','');
+  if (/^s\d+$/.test(hash)){
+    var hi = parseInt(hash.substring(1), 10);
+    if (!isNaN(hi) && hi >= 0 && hi < secs.length) initial = hi;
+  }
+
+  go(initial);
+  updateProgress();
+
+  /* Montaje inicial de ambos SVG (aunque CRÉDITOS no esté visible,
+     se montará también al activarse su pestaña). */
+  mountVisibleHeros();
+
+})();
+</script>
+
+<noscript>
+  <div style="position:fixed;left:0;right:0;bottom:0;background:#1e3a5f;color:#fff;padding:12px;text-align:center;z-index:99">
+    Este tutorial necesita JavaScript para la navegación por pestañas, el índice lateral y las ilustraciones animadas.
+  </div>
+</noscript>
+
+</body>
+</html>
